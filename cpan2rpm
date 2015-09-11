@@ -17,21 +17,22 @@ use File::Temp qw/tempdir/;
 
 # --- main() ------------------------------------------------------------------
 
-init();            # initialise stuff
-get_meta();        # get metadata from tarball
-mk_spec();         # create a custom spec file
-mk_rpm();          # build the RPM
-inst_rpm();        # install it if requested
+init();        # initialise stuff
+get_meta();    # get metadata from tarball
+mk_spec();     # create a custom spec file
+mk_rpm();      # build the RPM
+inst_rpm();    # install it if requested
 
 # --- support functionality ---------------------------------------------------
 
-my ($RPM, $TMPDIR, %RPMDIR, $CWD, %info, $tarRE);
+my ( $RPM, $TMPDIR, %RPMDIR, $CWD, %info, $tarRE );
 
 sub init {
-    $|++;    # good for system()
+    $|++;      # good for system()
     $tarRE = q/\.(tar\.(g?z|bz2)|tgz|zip)$/;
 
-    if ($ExtUtils::MakeMaker::VERSION =~ /5\.9[1-6]|6\.0[0-5]/) {
+    if ( $ExtUtils::MakeMaker::VERSION =~ /5\.9[1-6]|6\.0[0-5]/ ) {
+
         # Known bug in 5.91_01 - 6.05.
         print "\n\n-- Warning --\n";
         print "The version of ExtUtils::MakeMaker currently installed on\n";
@@ -39,7 +40,7 @@ sub init {
         print "Please upgrade with the following command:\n\n";
         print "  cpan2rpm --shadow-pure --install ExtUtils::MakeMaker\n\n\n";
         sleep 2;
-        }
+    }
 
     $RPM = inpath("rpmbuild");
     $RPM = inpath("rpm") unless $RPM;
@@ -47,114 +48,115 @@ sub init {
 
     # package info defaults
     %info = (
-        url          => "http://www.cpan.org",
-        packager     => "Arix International <cpan2rpm\@arix.com>",
-        group        => "Applications/CPAN",
-        license      => "Artistic",
-        release      => 1,
-        buildroot    => "%{_tmppath}/%{name}-%{version}-%(id -u -n)",
-        description  => "None.",
-        );
+        url         => "http://www.cpan.org",
+        packager    => "Arix International <cpan2rpm\@arix.com>",
+        group       => "Applications/CPAN",
+        license     => "Artistic",
+        release     => 1,
+        buildroot   => "%{_tmppath}/%{name}-%{version}-%(id -u -n)",
+        description => "None.",
+    );
 
     # syntax descriptions
     my %desc = (
-        "pkgname=s"        => "RPM package name",
-        "version=s"        => "override the CPAN version number",
-        "summary=s"        => "package summary",
-        "author=s"         => "author information",
-        "url=s"            => "home URL",
-        "packager=s"       => "packager identification",
-        "group=s"          => "RPM group",
-        "distribution=s"   => "RPM distribution",
-        "license=s"        => "licensing information",
-        "release=i"        => "RPM relase number",
-        "buildarch=s"      => "package architecture",
-        "buildroot=s"      => "root directory to use for build",
-        "requires=s"       => "packages required for installation",
-        "provides=s"       => "modules provided by the package",
-        "no-requires=s"    => "suppresses generation of a set of reqs",
-        "req-scan-all"     => "scan all files in a tarball for reqs",
-        "find-provides=s"  => "instructs us to use a given filter",
-        "find-requires=s"  => "(see man page for further details)",
-        "spec-only"        => "only generates spec file",
-        "spec=s"           => "specifies the name of a spec file",
-        "make-maker=s"     => "arguments for makefile creation",
-        "make=s"           => "arguments passed to make",
-        "make-no-test"     => "suppress running test suite",
-        "make-install=s"   => "arguments for make install",
-        "no-clean"         => "suppress --clean",
-        "shadow-pure"      => "override existing pure perl module",
-        "mk-rpm-dirs=s"    => "creates RPM dirs for non-root users",
-        "patch|p=s@"       => "specifies (multiple) patches to apply",
-        "doc=s"            => "adds to the spec's %doc section",
-        "install|i"        => "install package when done",
-        "description=s"    => "package description",
-        "nopkgprfx"        => "suppresses package name prefix",
-        "force"            => "forces all operations",
-        "debug:i"          => "produce debugging output",
-        "help|h"           => "this help screen",
-        "V"                => "cpan2rpm version",
-        );
+        "pkgname=s"       => "RPM package name",
+        "version=s"       => "override the CPAN version number",
+        "summary=s"       => "package summary",
+        "author=s"        => "author information",
+        "url=s"           => "home URL",
+        "packager=s"      => "packager identification",
+        "group=s"         => "RPM group",
+        "distribution=s"  => "RPM distribution",
+        "license=s"       => "licensing information",
+        "release=i"       => "RPM relase number",
+        "buildarch=s"     => "package architecture",
+        "buildroot=s"     => "root directory to use for build",
+        "requires=s"      => "packages required for installation",
+        "provides=s"      => "modules provided by the package",
+        "no-requires=s"   => "suppresses generation of a set of reqs",
+        "req-scan-all"    => "scan all files in a tarball for reqs",
+        "find-provides=s" => "instructs us to use a given filter",
+        "find-requires=s" => "(see man page for further details)",
+        "spec-only"       => "only generates spec file",
+        "spec=s"          => "specifies the name of a spec file",
+        "make-maker=s"    => "arguments for makefile creation",
+        "make=s"          => "arguments passed to make",
+        "make-no-test"    => "suppress running test suite",
+        "make-install=s"  => "arguments for make install",
+        "no-clean"        => "suppress --clean",
+        "shadow-pure"     => "override existing pure perl module",
+        "mk-rpm-dirs=s"   => "creates RPM dirs for non-root users",
+        "patch|p=s@"      => "specifies (multiple) patches to apply",
+        "doc=s"           => "adds to the spec's %doc section",
+        "install|i"       => "install package when done",
+        "description=s"   => "package description",
+        "nopkgprfx"       => "suppresses package name prefix",
+        "force"           => "forces all operations",
+        "debug:i"         => "produce debugging output",
+        "help|h"          => "this help screen",
+        "V"               => "cpan2rpm version",
+    );
 
     # get user options
     my %opts = ();
-    my $ret = GetOptions(\%opts, keys %desc);
+    my $ret = GetOptions( \%opts, keys %desc );
 
     $VX++, exit if $opts{V};
 
     print "\n-- cpan2rpm - Ver: $::VERSION --\n\n";
-    syntax(\%desc) if defined $opts{help} || !$ret;
+    syntax( \%desc ) if defined $opts{help} || !$ret;
 
     # override defaults with user options
-    %info = (%info, %opts);
+    %info = ( %info, %opts );
 
-    $CWD    = qx/pwd/; chomp($CWD);
-    $TMPDIR = tempdir(CLEANUP => $info{"no-clean"} ? 0 : 1);
+    $CWD = qx/pwd/;
+    chomp($CWD);
+    $TMPDIR = tempdir( CLEANUP => $info{"no-clean"} ? 0 : 1 );
 
-    if ($info{"mk-rpm-dirs"}) {
+    if ( $info{"mk-rpm-dirs"} ) {
         local $_ = "$ENV{HOME}/.rpmmacros";
         my $topdir = `echo -n $info{"mk-rpm-dirs"}`;
-        if (!-e) {
-            writefile($_, qq/%_topdir $topdir\n/);
-            }
+        if ( !-e ) {
+            writefile( $_, qq/%_topdir $topdir\n/ );
+        }
         elsif (-r) {
             my $s = readfile();
-            writefile($_, qq/\n%_topdir $topdir\n/, ">>")
-                unless $s =~ /topdir/is;
-            }
+            writefile( $_, qq/\n%_topdir $topdir\n/, ">>" )
+              unless $s =~ /topdir/is;
+        }
 
         mkdir $topdir, 0755 or die $!;
         for (qw/BUILD SOURCES RPMS SRPMS SPECS/) {
             mkdir qq=$topdir/$_=, 0755 or die $!;
-            }
+        }
 
         local $_ = "$ENV{HOME}/.rpmmacros";
-            writefile($_, qq=\n%_specdir $topdir/SPECS\n=, ">>");
-            writefile($_, qq=\n%_builddir $topdir/BUILD\n=, ">>");
-            writefile($_, qq=\n%_sourcedir $topdir/SOURCES\n=, ">>");
-            writefile($_, qq=\n%_srcrpmdir $topdir/SRPMS\n=, ">>");
+        writefile( $_, qq=\n%_specdir $topdir/SPECS\n=,     ">>" );
+        writefile( $_, qq=\n%_builddir $topdir/BUILD\n=,    ">>" );
+        writefile( $_, qq=\n%_sourcedir $topdir/SOURCES\n=, ">>" );
+        writefile( $_, qq=\n%_srcrpmdir $topdir/SRPMS\n=,   ">>" );
 
         print "RPM user environment set up.  Your system should be ";
         print "ready for packaging!\n";
         exit(0);
-        }
+    }
 
-    $RPMDIR{BUILD} = getrpm_macdef("_builddir");
+    $RPMDIR{BUILD}   = getrpm_macdef("_builddir");
     $RPMDIR{SOURCES} = getrpm_macdef("_sourcedir");
-    $RPMDIR{RPMS} = getrpm_macdef("_rpmdir");
-    $RPMDIR{SRPMS} = getrpm_macdef("_srcrpmdir");
-    $RPMDIR{SPECS} = getrpm_macdef("_specdir");
-    $RPMDIR{ARCH} = getrpm_macdef("_arch");
+    $RPMDIR{RPMS}    = getrpm_macdef("_rpmdir");
+    $RPMDIR{SRPMS}   = getrpm_macdef("_srcrpmdir");
+    $RPMDIR{SPECS}   = getrpm_macdef("_specdir");
+    $RPMDIR{ARCH}    = getrpm_macdef("_arch");
 
     $info{buildarch} ||= $RPMDIR{ARCH};
 
     # check directory permissions
 
     my $dirserr = 0;
-    my @dirs = ($RPMDIR{SRPMS}, $RPMDIR{SPECS}, $RPMDIR{BUILD});
+    my @dirs = ( $RPMDIR{SRPMS}, $RPMDIR{SPECS}, $RPMDIR{BUILD} );
     for (@dirs) {
         $dirserr++ unless -d && -w;
-        }
+    }
 
     if ($dirserr) {
         print "RPM user environment - Your account does not have permissions ";
@@ -163,7 +165,7 @@ sub init {
         print "non-root package building.  For more information, please refer ";
         print "to the --mk-rpm-dirs option in the man page\n";
         exit(1);
-        }
+    }
 
     # set requirements patch override
 
@@ -172,64 +174,66 @@ sub init {
     # get module name
 
     $info{module} = shift @ARGV
-        || syntax(\%desc, "No module or file specified!");
+      || syntax( \%desc, "No module or file specified!" );
 
-    if ($< && $info{install}) {
+    if ( $< && $info{install} ) {
         print "\n-- NON ROOT install requires sudo rpm privileges --\n";
-        if (system(qw/sudo rpm -v/)) {
+        if ( system(qw/sudo rpm -v/) ) {
             print "You can configure sudo with the following command:\n\n";
-            print "  echo ".getlogin()." ALL=/bin/rpm >> /etc/sudoers\n\n";
+            print "  echo " . getlogin() . " ALL=/bin/rpm >> /etc/sudoers\n\n";
             die "sudo failed: CANNOT USE --install OPTION!  Stopped";
-            }
+        }
 
         print "\n-- NON ROOT sudo precheck successful.\n";
-        }
+    }
 
     searchcpan();
 
-    if (isurl($info{module})) {
+    if ( isurl( $info{module} ) ) {
+
         #
         #    a url was passed
         #
 
-        get_url($RPMDIR{SOURCES}, $info{module});
+        get_url( $RPMDIR{SOURCES}, $info{module} );
 
-        $info{module} =~ s|.*/||;     # remove path
+        $info{module} =~ s|.*/||;                              # remove path
         $info{module} =~ s/-(\d+\.?\d*)\.(tar\.g?z|tgz).*//;
-        }
+    }
 
-    elsif (istarball($info{module}, 1)) {
+    elsif ( istarball( $info{module}, 1 ) ) {
+
         #
         #    argument passed is a local file name
         #
 
-        my ($d, $f) = $info{module} =~ m|(.*?)/?([^/]*)$|;
+        my ( $d, $f ) = $info{module} =~ m|(.*?)/?([^/]*)$|;
 
-        system("cp", "-u", $info{module}, $RPMDIR{SOURCES}) == 0
-            || die "Unable to copy tarball: $!"
-            unless finode($info{module}) eq finode("$RPMDIR{SOURCES}/$f")
-            ;
+        system( "cp", "-u", $info{module}, $RPMDIR{SOURCES} ) == 0
+          || die "Unable to copy tarball: $!"
+          unless finode( $info{module} ) eq finode("$RPMDIR{SOURCES}/$f");
 
-        $info{module} =~ s|.*/||;     # remove path
+        $info{module} =~ s|.*/||;    # remove path
         $info{tarball} = $info{module};
         $info{module} =~ s/-(\d+\.?\d*)$tarRE//;
         $info{module} =~ s/-/::/g;
-        }
+    }
 
     else {
+
         #
         #    assume argument passed is a Perl module name
         #
 
         get_mod();
-        }
     }
+}
 
 END {
     chdir $CWD;
-    return printf("%.3f\n", $VERSION) if $VX;
+    return printf( "%.3f\n", $VERSION ) if $VX;
     print "-- Done --\n";
-    }
+}
 
 #
 #    get metadata from tarball's MakeMaker file
@@ -239,30 +243,31 @@ sub get_meta {
     my $f = shift || "$RPMDIR{SOURCES}/$info{tarball}";
 
     my @ls;
-    ($info{tardir}, @ls) = tarls($f);
+    ( $info{tardir}, @ls ) = tarls($f);
     $info{create} = "-c" if $info{tardir} =~ s/\+$//;
 
     #    create file-list for spec's %doc section
 
-    @ls = map(m|[^/]*/(.*)|, @ls);    # strip leading dir
-    my $re = "(readme|changes|todo|license|install|\.txt|\.html)";
-    $info{doc} = join(" ", $info{doc}, grep(/$re/i, @ls));
+    @ls = map( m|[^/]*/(.*)|, @ls );    # strip leading dir
+    my $re = "(?<!/)(readme|changes|todo|license|install|\.txt|\.html)";
+    $info{doc} = join( " ", $info{doc}, grep( /$re/i, @ls ) );
     $info{doc} = "%doc $info{doc}" if $info{doc};
 
     #    extract tarball
 
     print "Tarball extraction: [$f]\n";
-    chdir(scalar untar($f));
+    chdir( scalar untar($f) );
 
     #    execute modified Makefile.PL
 
     print "Metadata retrieval\n";
 
     my %meta;
+
     # grap parameters to WriteMakefile()
     sub MyWriteMakefile {
         %meta = @_;
-        };
+    }
 
     local $_ = qq/package make; no strict; local (*STDOUT, *STDERR) = (); /;
     $_ .= qq/\$ARGV[0] = q{$info{"make-maker"}}; / if $info{"make-maker"};
@@ -279,52 +284,54 @@ sub get_meta {
     $info{pkgname} =~ s/::/-/g;
     $info{pkgname} =~ s/$tarRE//i;
     die "No package name available.  Stopped"
-        unless $info{pkgname};
+      unless $info{pkgname};
 
     $info{spec} ||= "$RPMDIR{SPECS}/$info{pkgname}.spec";
 
     #    get module description info
 
     my $from = $meta{ABSTRACT_FROM} || $meta{VERSION_FROM};
-    ($from = "$info{pkname}.pm") =~ s/.*:// unless $from;
+    ( $from = "$info{pkname}.pm" ) =~ s/.*:// unless $from;
     $from = readfile($from);
 
-    if (!$meta{ABSTRACT} && $from) {
+    if ( !$meta{ABSTRACT} && $from ) {
         local $_ = $from;
-        ($meta{ABSTRACT}) = /=head\d\s+NAME.*?-\s*(.*?)$/ism;
-        ($meta{DESCRIPTION}) = /=head\d\s+SYNOPSIS\s+(.*?)=head/ism;
+        ( $meta{ABSTRACT} )    = /=head\d\s+NAME.*?-\s*(.*?)$/ism;
+        ( $meta{DESCRIPTION} ) = /=head\d\s+SYNOPSIS\s+(.*?)=head/ism;
         $meta{DESCRIPTION} =~ s/E<lt>/</ig;
         $meta{DESCRIPTION} =~ s/E<gt>/>/ig;
-        }
+    }
 
-    if (!$info{author} && $from) {
+    if ( !$info{author} && $from ) {
         local $_ = $from;
-        ($info{author}) = /=head\d\s+AUTHOR\s+(.*)/i;
+        ( $info{author} ) = /=head\d\s+AUTHOR\s+(.*)/i;
         $info{author} =~ s/E<lt>/</ig;
         $info{author} =~ s/E<gt>/>/ig;
-        }
+    }
 
-    if (!$info{author} &&
-        isurl($info{source}) &&
-        $info{source} =~ m%author.*/([A-Z\-]+)/[^/]+$%) {
+    if (   !$info{author}
+        && isurl( $info{source} )
+        && $info{source} =~ m%author.*/([A-Z\-]+)/[^/]+$% )
+    {
+
         # Extract generic author from url
-        $info{author} = (lc $1).'@cpan.org';
-        }
+        $info{author} = ( lc $1 ) . '@cpan.org';
+    }
 
     die "No author information found and none supplied.  Stopped"
-        unless $info{author};
+      unless $info{author};
 
     #    extract version from tarball name
 
-    unless ($info{version}) {
+    unless ( $info{version} ) {
         $info{tarball} =~ /-(\d+.*)\.(tar\.g?z|tgz)$/;
         $info{version} = $1
-            || die "Could not ascertain version and none passed!";
-        }
+          || die "Could not ascertain version and none passed!";
+    }
 
     #    assemble other info
 
-    $info{summary} = "$info{pkgname} - " . ($meta{ABSTRACT} || "Perl module");
+    $info{summary} = "$info{pkgname} - " . ( $meta{ABSTRACT} || "Perl module" );
     $info{description} = $meta{DESCRIPTION} if $meta{DESCRIPTION};
     $info{source} ||= $info{tarball};
     $info{source} =~ s/$info{pkgname}/%{pkgname}/;
@@ -334,15 +341,15 @@ sub get_meta {
     $info{requires} &&= "Requires: $info{requires}";
     $info{provides} &&= "Provides: $info{provides}";
 
-    $info{"find-provides"}
-        &&= qq/%define __find_provides $info{"find-provides"}/;
-    $info{"find-requires"}
-        &&= qq/%define __find_requires $info{"find-requires"}/;
-    if ($info{"no-requires"}) {
+    $info{"find-provides"} &&=
+      qq/%define __find_provides $info{"find-provides"}/;
+    $info{"find-requires"} &&=
+      qq/%define __find_requires $info{"find-requires"}/;
+    if ( $info{"no-requires"} ) {
         my $noreqs = "";
         $noreqs .= qq/-e '$_' / for split /\s*,\s*/, $info{"no-requires"};
-        $info{"no-requires"}{"define"}
-            = "%define custom_find_req %{_tmppath}/%{NVR}-find-requires";
+        $info{"no-requires"}{"define"} =
+          "%define custom_find_req %{_tmppath}/%{NVR}-find-requires";
         $info{"find-requires"} = "%define __find_requires %{custom_find_req}";
         local $_ = qq[cat <<EOF > %{custom_find_req}
             #!/bin/sh
@@ -352,22 +359,23 @@ sub get_meta {
             ];
         s/^\s+//mg;
         $info{"no-requires"}{"install"} = $_;
-        $info{"no-requires"}{"clean"} = "rm -f %{custom_find_req}";
-        }
+        $info{"no-requires"}{"clean"}   = "rm -f %{custom_find_req}";
+    }
 
     # generate patch info
-    for my $i (0 .. $#{$info{patch}}) {
+    for my $i ( 0 .. $#{ $info{patch} } ) {
         $info{"patch-files"} .= "Patch$i: $info{patch}->[$i]\n";
         $info{"patch-apply"} .= "%patch$i -p1\n";
+
         # put patches in RPM dir if needed
-        system("cp", "-u", $info{patch}->[$i], $RPMDIR{SOURCES}) == 0
-            || die "Unable to copy patch: $!"
-        }
+        system( "cp", "-u", $info{patch}->[$i], $RPMDIR{SOURCES} ) == 0
+          || die "Unable to copy patch: $!";
+    }
 
     # return to user's directory
 
     chdir $CWD;
-    }
+}
 
 #
 #    generate s spec file
@@ -381,15 +389,15 @@ sub mk_spec {
 
     my $pkgname = $info{pkgname};
     $pkgname = "perl-" . $pkgname unless $info{nopkgprfx};
-    my $tardir = $info{tardir} eq "$info{name}-$info{version}"
-            ? "%{name}-%{version}"
-            : $info{tardir}
-            ;
+    my $tardir =
+      $info{tardir} eq "$info{name}-$info{version}"
+      ? "%{name}-%{version}"
+      : $info{tardir};
     $info{description} =~ s/\s+$//;
     $info{distribution} &&= "Distribution: $info{distribution}";
     $info{maketest} = "%{__make} test" unless $info{"make-no-test"};
 
-    if ($info{"shadow-pure"}) {
+    if ( $info{"shadow-pure"} ) {
         $info{"make-maker"} .= q{
             # Force pure perl installs into first @INC slot
             %{__perl} -pi -e 's,(INSTALL[PVS]\w+LIB =).*,$1 \$(INSTALLARCHLIB),' Makefile;
@@ -397,19 +405,20 @@ sub mk_spec {
             # Avoid man page conflicts with default
             %{__perl} -pi -e 's,(MAN3EXT =).*,$1 3,' Makefile;
             };
-        }
+    }
 
-    if ($info{pkgname} eq "ExtUtils-MakeMaker") {
+    if ( $info{pkgname} eq "ExtUtils-MakeMaker" ) {
+
         # MakeMaker builds itself using itself
         $ExtUtils::MakeMaker::VERSION = $info{version};
-        }
+    }
 
-    if ($ExtUtils::MakeMaker::VERSION >= "6.06") {
+    if ( $ExtUtils::MakeMaker::VERSION >= "6.06" ) {
         $info{"make-install"} ||= "DESTDIR=%{buildroot}";
-        }
+    }
     else {
         $info{"make-install"} ||= "PREFIX=%{buildroot}%{_prefix}";
-        }
+    }
 
     local $_ = <<ZZ;
         #
@@ -528,9 +537,9 @@ sub mk_spec {
 ZZ
     s/^\s+//gm;    # clean up
 
-    writefile($info{spec});
+    writefile( $info{spec} );
     exit if $info{"spec-only"};
-    }
+}
 
 #
 #    build the package
@@ -539,13 +548,11 @@ ZZ
 sub mk_rpm {
     my $pkgname = $info{pkgname};
     $pkgname = "perl-" . $pkgname unless $info{nopkgprfx};
-    $info{rpm} = sprintf("%s/%s-%s-%s.%s.rpm"
-        , "$RPMDIR{RPMS}/$info{buildarch}"
-        , $pkgname
-        , $info{version}
-        , $info{release}
-        , $info{buildarch}
-        );
+    $info{rpm} = sprintf(
+        "%s/%s-%s-%s.%s.rpm",
+        "$RPMDIR{RPMS}/$info{buildarch}",
+        $pkgname, $info{version}, $info{release}, $info{buildarch}
+    );
 
     return if -r $info{rpm} && !$info{force};
 
@@ -553,19 +560,19 @@ sub mk_rpm {
 
     my $ret = 0;
 
-    system($RPM, "-bp",  $info{spec});
+    system( $RPM, "-bp", $info{spec} );
     warn("RPM test unpacking failed!") if $ret = $? >> 8;
 
-    if ($ret == 0) {
-        my @cmd = ($RPM, '-ba', '--clean', $info{spec});
+    if ( $ret == 0 ) {
+        my @cmd = ( $RPM, '-ba', '--clean', $info{spec} );
         splice @cmd, 2, 1 if $info{"no-clean"};
         print join " ", ">>", @cmd, "\n" if defined $info{debug};
         system(@cmd);
         warn("RPM build failed!") if $ret = $? >> 8;
-        }
+    }
 
     return $ret;
-    }
+}
 
 #
 #    if requested, will also install the resulting RPM
@@ -575,11 +582,11 @@ sub inst_rpm {
     return unless $info{install};
 
     print "-- Installing package --\n";
-    my @cmd = (qw/rpm -Uvh/, $info{rpm});
+    my @cmd = ( qw/rpm -Uvh/, $info{rpm} );
     unshift @cmd, "sudo" if $<;
     system(@cmd);
     return $? >> 8;
-    }
+}
 
 # --- module retrieval functions ----------------------------------------------
 
@@ -589,45 +596,52 @@ sub inst_rpm {
 #
 
 sub searchcpan {
+
     # Abort unless it smells like a CPAN module
     return unless $info{module} =~ /^[\w:\-]+$/;
     print "-- Searching CPAN for module $info{module} --\n";
+
     # XXX - This algorithm may change as the
     # search.cpan.org web site output changes.
-    $@ = ""; eval "use HTTP::Request::Common; use LWP::UserAgent;";
+    $@ = "";
+    eval "use HTTP::Request::Common; use LWP::UserAgent;";
     if ($@) {
+
         # Could not load libwww-perl
         print "-- WARNING: libwww-perl module not found!\n";
         print "-- Install libwww-perl to avoid this warning.\n";
         print "-- One of the following options may help:\n";
-        print "--   1) Try http://www.rpmfind.net/linux/rpm2html/search.php?query=perl-libwww-perl\n";
+        print
+"--   1) Try http://www.rpmfind.net/linux/rpm2html/search.php?query=perl-libwww-perl\n";
         print "--   2) Specify the full URL of the tarball manually.\n";
         print "--   3) Download tarball and specify file on commandline.\n";
         print "--   4) Configure CPAN:  perl -MCPAN -eshell\n";
         print "--   5) cpan2rpm --install libwww-perl\n";
-        }
+    }
     else {
         my $dist = $info{module};
         $dist =~ s/::/-/g;
         my $dist_url = "http://search.cpan.org/dist/$dist/";
-        my $ua = new LWP::UserAgent;
-        my $response = $ua->request(GET($dist_url));
-        my $page = $response->content;
-        if ($page && $page =~
-            m%\<a[^<>]*       # Begin Anchor tag
+        my $ua       = new LWP::UserAgent;
+        my $response = $ua->request( GET($dist_url) );
+        my $page     = $response->content;
+        if (
+               $page
+            && $page =~ m%\<a[^<>]*       # Begin Anchor tag
             href\s*=\s*       # href parameter
             (['"]?)           # Maybe quote
             ([^<>\s"']*)      # Extract link as $2
             \1                # Maybe quote
             [^<>]*\>          # End Anchor tag
             \s*Download       # of the "Download" link
-            %ix               # case insensitive HTML
-            ) {
-            $info{module} = URI->new_abs($2, $response->base)->as_string;
+            %ix    # case insensitive HTML
+          )
+        {
+            $info{module} = URI->new_abs( $2, $response->base )->as_string;
             print "-- Found URL $info{module} --\n";
-            }
         }
     }
+}
 
 #
 #    grabs the module from CPAN and places in the SOURCES directory
@@ -638,47 +652,44 @@ sub searchcpan {
 
 sub get_mod {
     print "-- Retrieving module from CPAN --\n";
-    require  CPAN;
-    import   CPAN 0.59;
+    require CPAN;
+    import CPAN 0.59;
 
-    my $m = CPAN::Shell->expand("Module", $info{module})
-        || die "Module not found on CPAN!";
+    my $m = CPAN::Shell->expand( "Module", $info{module} )
+      || die "Module not found on CPAN!";
 
-    my $a = CPAN::Shell->expand("Author", $m->{RO}->{CPAN_USERID});
+    my $a = CPAN::Shell->expand( "Author", $m->{RO}->{CPAN_USERID} );
     $info{author} ||= "$a->{RO}->{FULLNAME} <$a->{RO}->{EMAIL}>";
 
     my $f = $m->{RO}->{CPAN_FILE};
-    $info{source} = sprintf("%s/authors/id/%s"
-        , "http://www.cpan.org"
-        , $f
-        );
+    $info{source} = sprintf( "%s/authors/id/%s", "http://www.cpan.org", $f );
 
-    my $tarball = $f; $tarball =~ s|.*/||;
+    my $tarball = $f;
+    $tarball =~ s|.*/||;
     $info{tarball} = $tarball;
 
     # bail if tarball already there (unless we're being --force'd)
-    return if -r "$RPMDIR{SOURCES}/$tarball"
-        && ! defined $info{force}
-        ;
+    return
+      if -r "$RPMDIR{SOURCES}/$tarball"
+          && !defined $info{force};
 
     get($f);
 
-    my $ff = sprintf("%s/authors/id/%s"
-        , $CPAN::Config->{'keep_source_where'}
-        , $f
-        );
+    my $ff =
+      sprintf( "%s/authors/id/%s", $CPAN::Config->{'keep_source_where'}, $f );
 
-    system("cp", $ff, $RPMDIR{SOURCES}) if -r $ff;
-    }
+    system( "cp", $ff, $RPMDIR{SOURCES} ) if -r $ff;
+}
 
 # --- RPM macro functions -----------------------------------------------------
 
 sub getrpm_macdef($) {
     my $key = shift;
-    chomp(local $_ = qx/rpm --eval \%{$key}/);
-    s/^\s+//; s/\s*\n+/ /gs;
+    chomp( local $_ = qx/rpm --eval \%{$key}/ );
+    s/^\s+//;
+    s/\s*\n+/ /gs;
     $_;
-    }
+}
 
 # --- tar handling functions --------------------------------------------------
 
@@ -688,11 +699,11 @@ sub getrpm_macdef($) {
 #
 
 sub istarball {
-    my ($fn, $fschk) = @_;
+    my ( $fn, $fschk ) = @_;
     my $is = $fn =~ /$tarRE/i;
     return $is unless $fschk && $is;
     -r $fn || die "tarball: $!";
-    }
+}
 
 #
 #    returns the root dir in a tarball (without trailing /)
@@ -703,46 +714,48 @@ sub tarls {
     my $f = shift || $_;
     local $_ = $f;
 
-    my ($d, @f) = /\.zip$/ ? zipls() : tzls();
+    my ( $d, @f ) = /\.zip$/ ? zipls() : tzls();
 
-    for (@f) {                       # look in file listing
-        last if $d;                  # never mind if dir found
-        $d = $_ if s|/.*||;          # strip dir from filename
-        }
-
-    if (!$d) {                       # if still no subdir found
-        local $_ = $f;               # assume tardir
-        s|.*/||;                     # without path
-        s/$tarRE//i;                 # or extension
-        $d = "$_+";                  # and indicate we made it up
-        }
-
-    $d =~ s|^\.+/||;                 # root = ./MyDir/
-    $d =~ s|/.*||;                   # make sure subdir found is top level
-    wantarray() ? ($d, @f) : $d;     # context aware
+    for (@f) {    # look in file listing
+        last if $d;    # never mind if dir found
+        $d = $_ if s|/.*||;    # strip dir from filename
     }
+
+    if ( !$d ) {               # if still no subdir found
+        local $_ = $f;         # assume tardir
+        s|.*/||;               # without path
+        s/$tarRE//i;           # or extension
+        $d = "$_+";            # and indicate we made it up
+    }
+
+    $d =~ s|^\.+/||;           # root = ./MyDir/
+    $d =~ s|/.*||;             # make sure subdir found is top level
+    wantarray() ? ( $d, @f ) : $d;    # context aware
+}
 
 sub tzls {
     my $f = shift || $_;
     my $opts = $f =~ /\.tar\.bz2/ ? "-tjvf" : "-tzvf";
-    my ($d, @f);
+    my ( $d, @f );
     for (qx/tar $opts $f/) {
-        split; local $_ = $_[5];
-        $_[0] =~ /^d/ && ($d ||= $_) || (push @f, $_);
-        }
-    ($d, @f);
+        split;
+        local $_ = $_[5];
+        $_[0] =~ /^d/ && ( $d ||= $_ ) || ( push @f, $_ );
     }
+    ( $d, @f );
+}
 
 sub zipls {
     my $f = shift || $_;
-    my ($d, @f);
+    my ( $d, @f );
     for (qx/unzip -l $f/) {
-        split; local $_ = $_[3];
+        split;
+        local $_ = $_[3];
         next unless $_[2] =~ /^\d/;
-        m|/$| && ($d ||= $_) || (push @f, $_);
-        }
-    ($d, @f);
+        m|/$| && ( $d ||= $_ ) || ( push @f, $_ );
     }
+    ( $d, @f );
+}
 
 #
 #    extracts a tarball
@@ -752,13 +765,13 @@ sub untar($) {
     local $_ = shift;
     my $dst = shift || $TMPDIR;
 
-    my @cmd = (qw/tar -xz --directory/, $dst, "-f", $_);
-    @cmd = (qw/tar -xj --directory/, $dst, "-f", $_) if /\.tar\.bz2$/;
-    @cmd = (qw/unzip -d/, $dst, $_) if /\.zip$/;
+    my @cmd = ( qw/tar -xz --directory/, $dst, "-f", $_ );
+    @cmd = ( qw/tar -xj --directory/, $dst, "-f", $_ ) if /\.tar\.bz2$/;
+    @cmd = ( qw/unzip -d/, $dst, $_ ) if /\.zip$/;
     system @cmd;
-    system("chmod", "-R", "u+w", $dst);
+    system( "chmod", "-R", "u+w", $dst );
     "$dst/" . tarls();
-    }
+}
 
 # --- file handling functions -------------------------------------------------
 
@@ -776,7 +789,7 @@ sub readfile {
     $_ = <_>;
     close(_);
     $_;
-    }
+}
 
 #
 #    writes a file, from a string
@@ -787,12 +800,12 @@ sub writefile($@) {
     local $_ = shift || $_;
     my $op = shift || ">";
 
-    open (FILE, "$op $fn") || die "writefile('$fn'): $!. Stopped";
+    open( FILE, "$op $fn" ) || die "writefile('$fn'): $!. Stopped";
     binmode(FILE);
     print FILE;
     close(FILE);
     $fn;
-    }
+}
 
 #    0: dev, 1: inode, the combination guarantees
 #    a unique file in a filesystem
@@ -801,14 +814,14 @@ sub finode {
     my $f = shift || $_;
     my @i = stat $f;
     return $i[0] . $i[1];
-    }
+}
 
 #    simple test to determine if it's a URL
 
 sub isurl {
     local $_ = shift || $_;
     scalar m#(ht|f)tp://#;
-    }
+}
 
 #    Syntax: get_url <directory> [url]
 
@@ -824,51 +837,75 @@ sub get_url($@) {
     return if -r "$d/$info{tarball}" && !$info{force};
 
     print "-- Retrieving URL --\n";
-    $@ = ""; eval "use HTTP::Request::Common; use LWP::UserAgent;";
-    if (!$@) {
-        writefile("$d/$info{tarball}",LWP::UserAgent->new->request(GET($info{source}))->content);
+    $@ = "";
+    eval "use HTTP::Request::Common; use LWP::UserAgent;";
+    if ( !$@ ) {
+        writefile( "$d/$info{tarball}",
+            LWP::UserAgent->new->request( GET( $info{source} ) )->content );
         return;
-        }
-    $@ = ""; eval "use HTTP::Lite;";
-    if (!$@) {
+    }
+    $@ = "";
+    eval "use HTTP::Lite;";
+    if ( !$@ ) {
         my $http = new HTTP::Lite;
-        $http->request($info{source}) || die "get_url(): $!.  Stopped";
-        writefile("$d/$info{tarball}", $http->body());
+        $http->request( $info{source} ) || die "get_url(): $!.  Stopped";
+        writefile( "$d/$info{tarball}", $http->body() );
         return;
-        }
+    }
 
     # Could not load libwww-perl
     print "-- WARNING: libwww-perl module not found!\n";
-    print "-- Install libwww-perl to avoid this warning: cpan2rpm --install libwww-perl\n";
+    print
+"-- Install libwww-perl to avoid this warning: cpan2rpm --install libwww-perl\n";
     print "-- Trying wget...\n";
-    if (-e "/usr/bin/wget" && !system("wget", "--directory-prefix=$d", $info{source})) {
+    if ( -e "/usr/bin/wget"
+        && !system( "wget", "--directory-prefix=$d", $info{source} ) )
+    {
         print "-- Success!\n";
         return;
-        }
+    }
     print "-- Trying lynx...\n";
-    if (-e "/usr/bin/lynx" && !system("lynx -source $info{source} > $info{tarball} && mv $info{tarball} $d/$info{tarball}")) {
+    if (
+        -e "/usr/bin/lynx"
+        && !system(
+"lynx -source $info{source} > $info{tarball} && mv $info{tarball} $d/$info{tarball}"
+        )
+      )
+    {
         print "-- Success!\n";
         return;
-        }
+    }
     print "-- Trying links...\n";
-    if (-e "/usr/bin/links" && !system("links -source $info{source} > $info{tarball} && mv $info{tarball} $d/$info{tarball}")) {
+    if (
+        -e "/usr/bin/links"
+        && !system(
+"links -source $info{source} > $info{tarball} && mv $info{tarball} $d/$info{tarball}"
+        )
+      )
+    {
         print "-- Success!\n";
         return;
-        }
+    }
     print "-- Trying ncftpget...\n";
-    if (-e "/usr/bin/ncftpget") {
-        if ($info{source} =~ m%^ftp://%i) {
-            if (!system("ncftpget $info{source} && mv $info{tarball} $d/$info{tarball}")) {
+    if ( -e "/usr/bin/ncftpget" ) {
+        if ( $info{source} =~ m%^ftp://%i ) {
+            if (
+                !system(
+"ncftpget $info{source} && mv $info{tarball} $d/$info{tarball}"
+                )
+              )
+            {
                 print "-- Success!\n";
                 return;
-                }
-            }
-        else {
-            print "-- Use the ftp:// url instead of $info{source}\n";
             }
         }
-    die "-- External program download failed.  Manual download required.  Stopped";
+        else {
+            print "-- Use the ftp:// url instead of $info{source}\n";
+        }
     }
+    die
+"-- External program download failed.  Manual download required.  Stopped";
+}
 
 # --- miscellany --------------------------------------------------------------
 
@@ -877,31 +914,31 @@ sub get_url($@) {
 #
 
 sub elem {
-    my $n = shift || 0;
+    my $n  = shift || 0;
     my $re = shift || '\s+';
     local $_ = shift || $_;
-    return (split /$re/)[$n];
-    }
+    return ( split /$re/ )[$n];
+}
 
 sub inpath($) {
     my $cmd = shift;
     -x "$_/$cmd" && return "$_/$cmd" for split /:/, $ENV{PATH};
-    }
+}
 
 sub changelog {
-    my @dow = ("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat");
-    my @mon = ("Jan", "Feb", "Mar", "Apr", "May", "Jun"
-        , "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-        );
+    my @dow = ( "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" );
+    my @mon = (
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+    );
 
-    return sprintf("%s %s %d %d %s"
-          , $dow[(localtime)[6]]
-        , $mon[(localtime)[4]]
-        , (localtime)[3]
-        , 1900 + (localtime)[5]
-        , sprintf("%s\@%s", (getpwuid($<))[0], hostname())
-        );
-    }
+    return sprintf( "%s %s %d %d %s",
+        $dow[ (localtime)[6] ],
+        $mon[ (localtime)[4] ],
+        (localtime)[3],
+        1900 + (localtime)[5],
+        sprintf( "%s\@%s", ( getpwuid($<) )[0], hostname() ) );
+}
 
 sub syntax {
     my $args = shift;
@@ -913,20 +950,21 @@ sub syntax {
     This script automates the creation of RPMs from CPAN modules.
     For further information please see the man page.
 EOF
-    s/^\s+//mg; print;
+    s/^\s+//mg;
+    print;
     print "\nSyntax: cpan2rpm [options] <module>\n\n";
     print "Where <module> is either the name of a Perl module (e.g.\n";
     print "Proc::Daemon) or of a tarball (e.g. Proc-Daemon-0.02.tar.gz),\n";
     print "and [options] is any of the following:\n\n";
-    for (sort keys %$args) {
+    for ( sort keys %$args ) {
         my ($arg) = split /[:=|]/;
         $arg = "-$arg" if length($arg) > 1;
         $arg = "-$arg" if $arg;
-        printf("  %-15s %s\n", $arg, $args->{$_});
-        }
+        printf( "  %-15s %s\n", $arg, $args->{$_} );
+    }
     print "\n";
     exit(1);
-    }
+}
 
 1;    # yipiness
 

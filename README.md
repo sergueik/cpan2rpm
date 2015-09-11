@@ -9,10 +9,11 @@ Replace the Time::Hires with the latest CPAN version:
 # perl -MCPAN -eshell
 cpan[]> install Time::Hires
 # find ~/.cpan/source -iname '*Time-Hires*' -exec cp {} ~rpmbuilder \;
+# chown rpmbuilder:rpmbuilder ~rpmbuilder/*gz
 # yum -y install perl
 # rpm -q perl-Time-HiRes
 # perl-Time-HiRes-1.9721-141.el6.x86_64
-# assuser rpmbuilder
+# adduser rpmbuilder -p <password>
 # su - rpmbuilder
 $ ./cpan2rpm  --mk-rpm-dirs=/tmp/test
 $ ./cpan2rpm  Time-HiRes-1.9726.tar.gz 
@@ -24,10 +25,19 @@ $ exit
 # perl-Time-HiRes-1.9726-1.x86_64
 # yum -y reinstall perl 
   Warning: RPMDB altered outside of yum
+# rm -fr /tmp/test/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}/*
+# perl -MCPAN -e 'install XML::Parser'
+# 
 ```
 Prerequisites
 -------------
 `rpmdevtools`, `rpm-build`. Also need to install CPAM module interactively before
+Successfully Converted Modules
+------------------------------
+  * Time::Hires
+  * XML::XPath
+  * XML::Parser (without listing expat-devel as package dependency) 
+
 
 See Also
 --------
