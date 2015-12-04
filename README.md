@@ -1,6 +1,6 @@
 Info
 ----
-Copy of the [cpan2rpm](http://search.cpan.org/dist/cpan2rpm/cpan2rpm) utility for generation of enterprise RPM repository for Perl modules which are too demanding to build at provisioning time. The project appears stale, script needs minor modifications.
+Fork of [cpan2rpm](http://search.cpan.org/dist/cpan2rpm/cpan2rpm) utility for generation of enterprise RPM repository for Perl modules which are too demanding to build at provisioning time. The project appears stale, script needs minor modifications.
 
 Example
 -------
@@ -43,6 +43,7 @@ See Also
 --------
   - [rpmbuild](https://github.com/jeekl/rpmbuild) chef cookbook.
   - [pupper-rpmbuild](https://github.com/dgutierrez1287/puppet-rpmbuild)
+  - [cpantorpm](http://search.cpan.org/~sbeck/cpantorpm-1.02/bin/cpantorpm.pod)
 
 Author
 ------
